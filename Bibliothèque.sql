@@ -9,7 +9,7 @@ CREATE TABLE users (
   age int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-
+ALTER TABLE utilisateurs ADD COLUMN role VARCHAR(20) DEFAULT 'etudiant';
 CREATE TABLE utilisateurs (
   id int PRIMARY KEY AUTO_INCREMENT ,
   nom varchar(50) DEFAULT NULL,
@@ -74,3 +74,26 @@ VALUES
   ('La Peste', 'Albert Camus', 'Roman', '/Assets/livre3.jpg', 'disponible'),
   ('1984', 'George Orwell', 'Science-fiction', '/Assets/livre4.jpg', 'disponible'),
   ('Le Rouge et le Noir', 'Stendhal', 'Classique', '/Assets/livre5.jpg', 'disponible');
+
+
+  CREATE TABLE emprunts (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  utilisateur_id INT NOT NULL,
+  livre_id INT NOT NULL,
+  date_emprunt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  date_retour DATETIME DEFAULT NULL,
+  statut VARCHAR(20) DEFAULT 'en_cours', -- en_cours, rendu, en_retard, etc.
+  FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id),
+  FOREIGN KEY (livre_id) REFERENCES livres(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE commentaires (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  utilisateur_id INT NOT NULL,
+  livre_id INT NOT NULL,
+  commentaire TEXT,
+  note INT CHECK (note >= 1 AND note <= 5),
+  date_commentaire DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id),
+  FOREIGN KEY (livre_id) REFERENCES livres(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
