@@ -1,3 +1,12 @@
+// Statistiques d'évolution du nombre d'utilisateurs (pour dashboard admin)
+exports.getUserStats = (req, res) => {
+  // Optionnel : sécuriser par un token admin si besoin
+  User.getStatsByDateInscription((err, rows) => {
+    if (err) return res.status(500).json({ message: "Erreur récupération statistiques utilisateurs", err });
+    // Formatage simple : [{ date: '2024-06-01', count: 3 }, ...]
+    res.json(rows);
+  });
+};
 const User = require('../models/user');
 
 exports.getMe = (req, res) => {

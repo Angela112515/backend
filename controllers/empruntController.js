@@ -1,3 +1,54 @@
+// POST /api/emprunts/notifier-retards : envoie les notifications de retard par email
+exports.notifierRetards = async (req, res) => {
+  require('dotenv').config();
+  const db = require('../database');
+  const nodemailer = require('nodemailer');
+  const transporter = nodemailer.createTransport({
+    service: process.env.SMTP_SERVICE || 'gmail',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  });
+  const sql = `
+    SELECT e.id AS emprunt_id, e.date_emprunt, e.date_retour, e.statut,
+           l.titre AS livre_titre, l.auteur AS livre_auteur,
+           u.nom, u.prenom, u.email
+    FROM emprunts e
+    JOIN livres l ON e.livre_id = l.id
+    JOIN utilisateurs u ON e.utilisateur_id = u.id
+    WHERE e.statut != 'retourné' AND e.date_retour < NOW()
+  `;
+  db.query(sql, async (err, rows) => {
+    if (err) {
+      return res.status(500).json({ message: 'Erreur SQL', err });
+    }
+    if (!rows.length) {
+      return res.json({ message: 'Aucun emprunt en retard à notifier.' });
+    }
+    let nbSuccess = 0;
+    let nbFail = 0;
+    for (const emprunt of rows) {
+      const mailOptions = {
+        from: process.env.SMTP_USER,
+        to: emprunt.email,
+        subject: `Rappel : Livre en retard - ${emprunt.livre_titre}`,
+        text: `Bonjour ${emprunt.nom} ${emprunt.prenom},\n\nVous avez un livre en retard :\n- Titre : ${emprunt.livre_titre}\n- Auteur : ${emprunt.livre_auteur}\n- Date de retour prévue : ${new Date(emprunt.date_retour).toLocaleDateString()}\n\nMerci de le rapporter au plus vite à la bibliothèque.\n\nCeci est un rappel automatique.`
+      };
+      try {
+        await transporter.sendMail(mailOptions);
+        nbSuccess++;
+      } catch (e) {
+        console.error(`Erreur envoi email à ${emprunt.email}:`, e);
+        nbFail++;
+      }
+    }
+    return res.json({ message: `Notifications envoyées à ${nbSuccess} étudiant(s).${nbFail ? ' Échecs: ' + nbFail : ''}` });
+  });
+};
 // PUT /api/emprunts/retour/:id : retour d'un livre
 exports.retournerLivre = (req, res) => {
   const empruntId = req.params.id;

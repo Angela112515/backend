@@ -23,6 +23,9 @@ exports.signup = (req, res) => {
 
 exports.login = (req, res) => {
   const { email, password } = req.body;
+  if (!process.env.JWT_SECRET) {
+    return res.status(500).json({ message: 'JWT_SECRET non défini sur le serveur' });
+  }
   User.findByEmail(email, async (err, users) => {
     if (err || !users || users.length === 0) {
       return res.status(401).json({ message: 'Email ou mot de passe incorrect' });

@@ -12,6 +12,10 @@ router.put('/:id', userController.updateUser);
 // Supprimer un étudiant
 router.delete('/:id', userController.deleteUser);
 
+
+// Statistiques d'évolution du nombre d'utilisateurs (dashboard admin)
+router.get('/stats', userController.getUserStats);
+
 // Récupérer son propre profil
 router.get('/me', auth, userController.getMe);
 

@@ -1,3 +1,16 @@
+// Planification automatique des notifications de retard (cron)
+const cron = require('node-cron');
+const empruntController = require('./controllers/empruntController');
+
+// Tous les jours à 7h du matin
+cron.schedule('0 7 * * *', () => {
+  console.log('[CRON] Déclenchement de la notification automatique des retards...');
+  // Appel direct du contrôleur (req, res simulés)
+  empruntController.notifierRetards(
+    { user: { role: 'admin', id: 0 } },
+    { json: (msg) => console.log('[CRON][Résultat]', msg), status: () => ({ json: (msg) => console.log('[CRON][Erreur]', msg) }) }
+  );
+});
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');

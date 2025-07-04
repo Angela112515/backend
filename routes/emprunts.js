@@ -13,3 +13,10 @@ router.get('/mes', auth, empruntController.getUserEmprunts);
 router.put('/retour/:id', auth, empruntController.retournerLivre);
 
 module.exports = router;
+// Notifier les retards (admin)
+router.post('/notifier-retards', require('../middleware/auth'), async (req, res) => {
+  // Optionnel: vérifier que l'utilisateur est admin ici
+  // if (!req.user || req.user.role !== 'admin') return res.status(403).json({ message: 'Accès refusé' });
+  const controller = require('../controllers/empruntController');
+  return controller.notifierRetards(req, res);
+});
